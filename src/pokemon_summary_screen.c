@@ -58,6 +58,12 @@ enum {
     PSS_PAGE_COUNT,
 };
 
+typedef enum {
+  STATS,
+  EV,
+  IV
+} pss_page_skill_types;
+
 // Screen titles (upper left)
 #define PSS_LABEL_WINDOW_POKEMON_INFO_TITLE 0
 #define PSS_LABEL_WINDOW_POKEMON_SKILLS_TITLE 1
@@ -100,9 +106,12 @@ enum {
 // Dynamic fields for the Pokémon Skills page
 #define PSS_DATA_WINDOW_SKILLS_HELD_ITEM 0
 #define PSS_DATA_WINDOW_SKILLS_RIBBON_COUNT 1
-#define PSS_DATA_WINDOW_SKILLS_STATS_LEFT 2 // HP, Attack, Defense
-#define PSS_DATA_WINDOW_SKILLS_STATS_RIGHT 3 // Sp. Attack, Sp. Defense, Speed
-#define PSS_DATA_WINDOW_EXP 4 // Exp, next level
+#define PSS_DATA_WINDOW_SKILLS_STATS 2 // STATS, EVS, IVS
+#define PSS_DATA_WINDOW_SKILLS_EVS 3
+#define PSS_DATA_WINDOW_SKILLS_IVS 4
+#define PSS_DATA_WINDOW_SKILLS_STATS_LEFT 5 // HP, Attack, Defense
+#define PSS_DATA_WINDOW_SKILLS_STATS_RIGHT 6 // Sp. Attack, Sp. Defense, Speed
+#define PSS_DATA_WINDOW_EXP 7 // Exp, next level
 
 // Dynamic fields for the Battle Moves and Contest Moves pages.
 #define PSS_DATA_WINDOW_MOVE_NAMES 0
@@ -275,6 +284,7 @@ static void PrintEggMemo(void);
 static void Task_PrintSkillsPage(u8);
 static void PrintHeldItemName(void);
 static void PrintSkillsPageText(void);
+static void PrintSkillsPageStatMode(pss_page_skill_types mode);
 static void PrintRibbonCount(void);
 static void BufferLeftColumnStats(void);
 static void PrintLeftColumnStats(void);
@@ -325,6 +335,7 @@ static void BufferIvOrEvStats(u8 mode);
 
 static const struct BgTemplate sBgTemplates[] =
 {
+    // INFO
     {
         .bg = 0,
         .charBaseIndex = 0,
@@ -334,6 +345,7 @@ static const struct BgTemplate sBgTemplates[] =
         .priority = 0,
         .baseTile = 0,
     },
+    // SKILLS
     {
         .bg = 1,
         .charBaseIndex = 2,
@@ -343,6 +355,7 @@ static const struct BgTemplate sBgTemplates[] =
         .priority = 1,
         .baseTile = 0,
     },
+    // MOVES
     {
         .bg = 2,
         .charBaseIndex = 2,
@@ -352,6 +365,7 @@ static const struct BgTemplate sBgTemplates[] =
         .priority = 2,
         .baseTile = 0,
     },
+    // CONTEST MOVES
     {
         .bg = 3,
         .charBaseIndex = 2,
@@ -633,6 +647,34 @@ static const struct WindowTemplate sPageSkillsTemplate[] =
         .height = 2,
         .paletteNum = 6,
         .baseBlock = 469,
+    },
+    // TODO: FIXME: Unimplemented
+    [PSS_DATA_WINDOW_SKILLS_STATS] = {
+        .bg = 0,
+        .tilemapLeft = 6,
+        .tilemapTop = 6,
+        .width = (6 * sizeof("STATS")),       // Each character has a fixed width of 6
+        .height = 8,      // Each character has a fixed width of 8
+        .paletteNum = 6,
+        .baseBlock = 475,
+    },
+    [PSS_DATA_WINDOW_SKILLS_EVS] = {
+        .bg = 0,
+        .tilemapLeft = 6,
+        .tilemapTop = 6,
+        .width = (6 * sizeof("EVS")),       // Each character has a fixed width of 6
+        .height = 8,      // Each character has a fixed width of 8
+        .paletteNum = 6,
+        .baseBlock = 475,
+    },
+    [PSS_DATA_WINDOW_SKILLS_IVS] = {
+        .bg = 0,
+        .tilemapLeft = 6,
+        .tilemapTop = 6,
+        .width = (6 * sizeof("IVS")),       // Each character has a fixed width of 6
+        .height = 8,      // Each character has a fixed width of 8
+        .paletteNum = 6,
+        .baseBlock = 475,
     },
     [PSS_DATA_WINDOW_SKILLS_STATS_LEFT] = {
         .bg = 0,
@@ -3433,6 +3475,7 @@ static void PrintEggMemo(void)
 
 static void PrintSkillsPageText(void)
 {
+    PrintSkillsPageStatMode(STATS);
     PrintHeldItemName();
     PrintRibbonCount();
     BufferLeftColumnStats();
@@ -3474,6 +3517,39 @@ static void Task_PrintSkillsPage(u8 taskId)
         return;
     }
     data[0]++;
+}
+
+
+/**
+ * @brief Print out the status that is selected.
+ * @params mode   Which stat selection has been made (STATS, EV, IV).
+ */
+static void PrintSkillsPageStatMode(pss_page_skill_types mode)
+{
+    // TODO: Will have to insert more here later.
+    FillWindowPixelBuffer(sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_SKILLS_STATS], 0);
+    FillWindowPixelBuffer(sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_SKILLS_EVS], 0);
+    FillWindowPixelBuffer(sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_SKILLS_IVS], 0);
+    
+    // Cannot use PrintTextOnWindow() here because we must override the font type.
+    AddTextPrinterParameterized4(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS), FONT_SHORT, 0, 0, 0, 0, 0, 0, gText_StatsHeader);
+    // PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS), gText_StatsHeader, 0, 0, 0, 0);
+    // PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS), gText_StatsHeader, 0, 0, 0, 0);
+    // PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_EVS), gText_EVsHeader, 0, 0, 0, 0);
+    // PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_IVS), gText_IVsHeader, 0, 0, 0 ,0);
+
+    switch(mode)
+    {
+        case STATS:
+            // TODO: Print stuff
+            break;
+        case EV:
+            break;
+        case IV:
+            break;
+        default:
+            break;
+    }
 }
 
 static void PrintHeldItemName(void)
@@ -3524,12 +3600,14 @@ static void PrintRibbonCount(void)
 static void BufferIvOrEvStats(u8 mode)
 {
     u16 hp, hp2, atk, def, spA, spD, spe;
-    u8 *currHPString = Alloc(20);
+    u8 *currHPString  = Alloc(20);
     const s8 *natureMod = gNatureStatTable[sMonSummaryScreen->summary.nature];
 
     switch (mode)
     {
     case 0: // iv mode
+        PrintSkillsPageStatMode(IV);
+
         hp = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_HP_IV);
         atk = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_ATK_IV);
         def = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_DEF_IV);
@@ -3539,6 +3617,8 @@ static void BufferIvOrEvStats(u8 mode)
         spe = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_SPEED_IV);
         break;
     case 1: // ev mode
+        PrintSkillsPageStatMode(EV);
+
         hp = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_HP_EV);
         atk = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_ATK_EV);
         def = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_DEF_EV);
@@ -3549,6 +3629,8 @@ static void BufferIvOrEvStats(u8 mode)
         break;
     case 2: // stats mode
     default:
+        PrintSkillsPageStatMode(STATS);  
+
         hp = sMonSummaryScreen->summary.currentHP;
         hp2 = sMonSummaryScreen->summary.maxHP;
         atk = sMonSummaryScreen->summary.atk;
