@@ -1,3 +1,4 @@
+#include "gba/isagbprint.h"
 #include "global.h"
 #include "main.h"
 #include "battle.h"
@@ -651,30 +652,30 @@ static const struct WindowTemplate sPageSkillsTemplate[] =
     // TODO: FIXME: Unimplemented
     [PSS_DATA_WINDOW_SKILLS_STATS] = {
         .bg = 0,
-        .tilemapLeft = 6,
+        .tilemapLeft = 12,
         .tilemapTop = 6,
-        .width = (6 * sizeof("STATS")),       // Each character has a fixed width of 6
-        .height = 8,      // Each character has a fixed width of 8
+        .width = 4,       // Each character has a fixed width of 6
+        .height = 1,                          // Each character has a fixed height of 8
         .paletteNum = 6,
-        .baseBlock = 475,
+        .baseBlock = 489,
     },
     [PSS_DATA_WINDOW_SKILLS_EVS] = {
         .bg = 0,
-        .tilemapLeft = 6,
+        .tilemapLeft = 21,
         .tilemapTop = 6,
-        .width = (6 * sizeof("EVS")),       // Each character has a fixed width of 6
-        .height = 8,      // Each character has a fixed width of 8
+        .width = 3,
+        .height = 1,
         .paletteNum = 6,
-        .baseBlock = 475,
+        .baseBlock = 493,
     },
     [PSS_DATA_WINDOW_SKILLS_IVS] = {
         .bg = 0,
-        .tilemapLeft = 6,
+        .tilemapLeft = 26,
         .tilemapTop = 6,
-        .width = (6 * sizeof("IVS")),       // Each character has a fixed width of 6
-        .height = 8,      // Each character has a fixed width of 8
+        .width = 3,       // Each character has a fixed width of 6
+        .height = 1,      // Each character has a fixed width of 8
         .paletteNum = 6,
-        .baseBlock = 475,
+        .baseBlock = 496,
     },
     [PSS_DATA_WINDOW_SKILLS_STATS_LEFT] = {
         .bg = 0,
@@ -683,7 +684,7 @@ static const struct WindowTemplate sPageSkillsTemplate[] =
         .width = 6,
         .height = 6,
         .paletteNum = 6,
-        .baseBlock = 489,
+        .baseBlock = 499,
     },
     [PSS_DATA_WINDOW_SKILLS_STATS_RIGHT] = {
         .bg = 0,
@@ -692,7 +693,7 @@ static const struct WindowTemplate sPageSkillsTemplate[] =
         .width = 3,
         .height = 6,
         .paletteNum = 6,
-        .baseBlock = 525,
+        .baseBlock = 535,
     },
     [PSS_DATA_WINDOW_EXP] = {
         .bg = 0,
@@ -701,7 +702,7 @@ static const struct WindowTemplate sPageSkillsTemplate[] =
         .width = 6,
         .height = 4,
         .paletteNum = 6,
-        .baseBlock = 543,
+        .baseBlock = 553,
     },
 };
 static const struct WindowTemplate sPageMovesTemplate[] = // This is used for both battle and contest moves
@@ -3475,7 +3476,6 @@ static void PrintEggMemo(void)
 
 static void PrintSkillsPageText(void)
 {
-    PrintSkillsPageStatMode(STATS);
     PrintHeldItemName();
     PrintRibbonCount();
     BufferLeftColumnStats();
@@ -3527,13 +3527,15 @@ static void Task_PrintSkillsPage(u8 taskId)
 static void PrintSkillsPageStatMode(pss_page_skill_types mode)
 {
     // TODO: Will have to insert more here later.
+    MgbaPrintf(MGBA_LOG_DEBUG, "Blanking PSS_DATA_WINDOW_SKILLS_STATS Buffer");
     FillWindowPixelBuffer(sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_SKILLS_STATS], 0);
-    FillWindowPixelBuffer(sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_SKILLS_EVS], 0);
-    FillWindowPixelBuffer(sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_SKILLS_IVS], 0);
+    // FillWindowPixelBuffer(sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_SKILLS_EVS], 0);
+    // FillWindowPixelBuffer(sMonSummaryScreen->windowIds[PSS_DATA_WINDOW_SKILLS_IVS], 0);
     
     // Cannot use PrintTextOnWindow() here because we must override the font type.
-    AddTextPrinterParameterized4(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS), FONT_SHORT, 0, 0, 0, 0, 0, 0, gText_StatsHeader);
-    // PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS), gText_StatsHeader, 0, 0, 0, 0);
+    MgbaPrintf(MGBA_LOG_DEBUG, "Writing PSS_DATA_WINDOW_SKILLS_STATS Value.");
+    //AddTextPrinterParameterized4(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS), FONT_SMALL, 1, 1, 0, 0, sTextColors[1], 0, gText_StatsHeader);
+    PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS), gText_StatsHeader, 0, 0, 0, 1);
     // PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_STATS), gText_StatsHeader, 0, 0, 0, 0);
     // PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_EVS), gText_EVsHeader, 0, 0, 0, 0);
     // PrintTextOnWindow(AddWindowFromTemplateList(sPageSkillsTemplate, PSS_DATA_WINDOW_SKILLS_IVS), gText_IVsHeader, 0, 0, 0 ,0);
